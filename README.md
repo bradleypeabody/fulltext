@@ -60,6 +60,6 @@ I originally tried doing this on top of Sqlite.  It was dreadfully slow.  Cdb is
 
 Two main disadvantages from going the Cdb route are that the index cannot be edited once it is built (you have to recreate it in full), and since it's hash-based it will not support any sort of fuzzy matching unless those variations are included in the index (which they are not, in the current implementation.)   For my purposes these two disadvantages are overshadowed by the fact that it's blinding fast, easy to use, portable (pure-Go), and it's interface allowed me to build the indexes I needed into a single file.
 
-In the test suite is included a copy of the complete works of William Shakespeare and this library is used to create a simple search engine on top of that corpus.  By default it only runs for 10 seconds, but you can run it for longer by doing something like:
+In the test suite is included a copy of the complete works of William Shakespeare (thanks to Jeremy Hylton's http://shakespeare.mit.edu/) and this library is used to create a simple search engine on top of that corpus.  By default it only runs for 10 seconds, but you can run it for longer by doing something like:
 
 	SEARCHER_WEB_TIMEOUT_SECONDS=120 go test fulltext -v
