@@ -32,7 +32,7 @@ First, you must create an index.  Like this:
 Once you have an index file, you can search it like this:
 
 	s, err := fulltext.NewSearcher("/path/to/index/file"); if err != nil { panic(err) }
-	sr, err := s.SimpleSearch("king", 20); if err != nil { panic(err) }
+	sr, err := s.SimpleSearch("Horatio", 20); if err != nil { panic(err) }
 	for k, v := range sr.Items {
 		fmt.Printf("----------- #:%d\n", k)
 		fmt.Printf("Id: %s\n", v.Id)
