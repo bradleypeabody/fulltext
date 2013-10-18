@@ -31,8 +31,6 @@ func zipExtract(zfpath string, fpath string) ([]byte, error) {
 
     	fn := strings.Trim(filepath.Clean(filepath.ToSlash(f.Name)), "/")
 
-    	// fmt.Printf("%s / %s\n", fn, fpath)
-
     	// keep going until we find it
     	if fn != fpath { continue }
 
@@ -55,15 +53,9 @@ func TestTheBardSearch(t *testing.T) {
 	fmt.Println("TestTheBardIndexing")
 
 	idx, err := NewIndexer(""); if err != nil { panic(err) }
-	// defer idx.Close() // FIXME, should be enabled
-
-	// p := path.Join(os.TempDir(), "fulltext-test-full.db")
-	// syscall.Unlink(p) // ignore error
-	// fmt.Printf("Using temp path: %s\n", p)
+	defer idx.Close()
 
 	titlere := re.MustCompile("(?i)<title>([^<]+)</title>")
-
-	// n := 0
 
 	zr, err := zip.OpenReader("testdata/shakespeare.mit.edu.zip"); if err != nil { panic(err) }
 	defer zr.Close()
