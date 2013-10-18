@@ -32,6 +32,7 @@ First, you must create an index.  Like this:
 Once you have an index file, you can search it like this:
 
 	s, err := fulltext.NewSearcher("/path/to/index/file"); if err != nil { panic(err) }
+	defer s.Close()
 	sr, err := s.SimpleSearch("Horatio", 20); if err != nil { panic(err) }
 	for k, v := range sr.Items {
 		fmt.Printf("----------- #:%d\n", k)
@@ -39,7 +40,6 @@ Once you have an index file, you can search it like this:
 		fmt.Printf("Score: %d\n", v.Score)
 		fmt.Printf("StoreValue: %s\n", v.StoreValue)
 	}
-	s.Close()
 
 It's rather simplistic.  But it's fast and it works.
 
