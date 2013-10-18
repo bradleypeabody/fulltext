@@ -5,9 +5,17 @@ This is a simple, pure-Go, full text indexing and search library.
 
 I made it for use on small to medium websites, although there is nothing web-specific about it's API or operation.
 
-
-
 In the test suite is included a copy of the complete works of William Shakespeare and a this library is used to create a simple search engine using that data.
+
+USAGE:
+------
+
+First, you must create an index.  Like this:
+
+	// create new index with temp dir (usually "" is fine)
+	idx, err := NewIndexer(""); if err != nil { panic(err) }
+
+	
 
 TODO:
 -----
