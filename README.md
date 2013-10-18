@@ -1,0 +1,4 @@
+fulltext
+========
+
+Pure-Go 
