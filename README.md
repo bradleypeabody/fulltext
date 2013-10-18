@@ -7,6 +7,11 @@ I made it for use on small to medium websites, although there is nothing web-spe
 
 Cdb (http://github.com/jbarham/go-cdb) is used to perform the indexing and lookups.
 
+Status
+------
+
+This project is experimental.  Breaking changes very well may occur.
+
 Usage
 ------
 
