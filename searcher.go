@@ -1,4 +1,3 @@
-
 package fulltext
 
 import (
@@ -48,6 +47,7 @@ type SearchResults struct {
 
 
 // Make a new searcher using the file at the specified path
+// TODO: Make a variation that accepts a ReaderAt
 func NewSearcher(fpath string) (*Searcher, error) {
 
 	s := &Searcher{}
