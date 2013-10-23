@@ -60,7 +60,7 @@ TODOs
 
 * Will likely need some sort of "stop word" functionality.
 
-* Wordize(), Indexize() and the scoring aggregation logic should be extracted to callback functions with the existing functionality as default.
+* ~~Wordize(), IndexizeWord()~~ and the scoring aggregation logic should be extracted to callback functions with the existing functionality as default.
 
 * If there is some decent b-tree disk storage that is portable then it would be worth looking at using that instead of CDB and implementing LIKE-style matching.  As it is, CDB is quite efficient, but it is a hash index.
 
