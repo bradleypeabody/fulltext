@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"bytes"
 	"encoding/gob"
-	"go-cdb"
+	"github.com/jbarham/go-cdb"
 )
 
 // Size of header block to prepend - make it 4k to align disk reads

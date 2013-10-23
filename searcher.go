@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"sort"
 	"encoding/gob"
-	"go-cdb"
+	"github.com/jbarham/go-cdb"
 )
 
 // Interface for search.  Not thread-safe, but low overhead
