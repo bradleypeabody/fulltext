@@ -22,6 +22,8 @@ type Indexer struct {
 	docCdbFile *os.File
 	wordCdbFile *os.File
 	wordMap map[string]map[string]int // map of [word][docId]count
+    WordSplit WordSplitter
+    WordClean WordCleaner
 }
 
 // Contents of a single document to be indexed
@@ -41,6 +43,8 @@ func NewIndexer(tempDir string) (*Indexer, error) {
 	idx.docCdbFile, err = ioutil.TempFile(tempDir, "doccdb"); if err != nil { return nil, err }
 	idx.wordCdbFile, err = ioutil.TempFile(tempDir, "wordcdb"); if err != nil { return nil, err }
 	idx.wordMap = make(map[string]map[string]int)
+    idx.WordSplit = Wordize
+    idx.WordClean = IndexizeWord
 	return idx, nil
 }
 
@@ -49,9 +53,9 @@ func (idx *Indexer)AddDoc(idoc IndexDoc) error {
 	// add to docs
 	docId := string(idoc.Id)
 	writeTextLine(idx.docTxtFile, []byte(docId), idoc.StoreValue)
-	words := append(Wordize(string(idoc.IndexValue)), Wordize(string(idoc.StoreValue))...)
+	words := append(idx.WordSplit(string(idoc.IndexValue)), idx.WordSplit(string(idoc.StoreValue))...)
 	for _, word := range words {
-		word = IndexizeWord(word)
+		word = idx.WordClean(word)
 		// ensure nested map exists
 		if idx.wordMap[word] == nil { idx.wordMap[word] = make(map[string]int) }
 		// increment count by one for this combination
