@@ -12,6 +12,13 @@ Status
 
 This project is experimental.  Breaking changes very well may occur.
 
+Notes on Building
+--------
+
+fulltext requires CDB:
+
+ go get github.com/jbarham/go-cdb
+
 Usage
 ------
 
