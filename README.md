@@ -17,7 +17,7 @@ Notes on Building
 
 fulltext requires CDB:
 
- go get github.com/jbarham/go-cdb
+	go get github.com/jbarham/go-cdb
 
 Usage
 ------
