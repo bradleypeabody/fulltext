@@ -30,7 +30,8 @@ func IndexizeWord(w string) string {
 // This function copied from here: https://github.com/kennygrant/sanitize/blob/master/sanitize.go
 // License is: https://github.com/kennygrant/sanitize/blob/master/License-BSD.txt
 // Strip html tags, replace common entities, and escape <>&;'" in the result.
-// Note the returned text may contain entities as it is escaped by HTMLEscapeString, and most entities are not translated.
+// Note the returned text may contain entities as it is escaped by HTMLEscapeString,
+// and most entities are not translated.
 func HTMLStripTags(s string) (output string) {
 
 	output = ""
