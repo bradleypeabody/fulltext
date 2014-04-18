@@ -75,3 +75,5 @@ Two main disadvantages from going the Cdb route are that the index cannot be edi
 In the test suite is included a copy of the complete works of William Shakespeare (thanks to Jeremy Hylton's http://shakespeare.mit.edu/) and this library is used to create a simple search engine on top of that corpus.  By default it only runs for 10 seconds, but you can run it for longer by doing something like:
 
 	SEARCHER_WEB_TIMEOUT_SECONDS=120 go test fulltext -v
+
+Works on Windows.
