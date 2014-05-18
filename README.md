@@ -70,10 +70,15 @@ Implementation Notes
 
 I originally tried doing this on top of Sqlite.  It was dreadfully slow.  Cdb is orders of magnitude faster.
 
-Two main disadvantages from going the Cdb route are that the index cannot be edited once it is built (you have to recreate it in full), and since it's hash-based it will not support any sort of fuzzy matching unless those variations are included in the index (which they are not, in the current implementation.)   For my purposes these two disadvantages are overshadowed by the fact that it's blinding fast, easy to use, portable (pure-Go), and it's interface allowed me to build the indexes I needed into a single file.
+Two main disadvantages from going the Cdb route are that the index cannot be edited once it is built (you have to recreate it in full), and since it's hash-based it will not support any sort of fuzzy matching unless those variations are included in the index (which they are not, in the current implementation.)   For my purposes these two disadvantages are overshadowed by the fact that it's blinding fast, easy to use, portable (pure-Go), and its interface allowed me to build the indexes I needed into a single file.
 
 In the test suite is included a copy of the complete works of William Shakespeare (thanks to Jeremy Hylton's http://shakespeare.mit.edu/) and this library is used to create a simple search engine on top of that corpus.  By default it only runs for 10 seconds, but you can run it for longer by doing something like:
 
 	SEARCHER_WEB_TIMEOUT_SECONDS=120 go test fulltext -v
 
 Works on Windows.
+
+Future Work
+-----------
+
+It might be feasible to supplant this project with something using suffix arrays ( http://golang.org/pkg/index/suffixarray/ ).  The main down side would be the requirement of a lot more storage space (and memory to load and search it).  Retooling the index/suffixarray package so it can work against the disk is an idea, but is not necessarily simple.  The upside of an approach like that would be full regex support for searches with decent performance - which would rock.  The index could potentially be sharded by the first character or two of the search - but that's still not as good as something with sensible caching where the whole set can be kept on disk and the "hot" parts cached in memory, etc.
