@@ -46,7 +46,7 @@ func (s SearchResultItems) Less(i, j int) bool {
 	// if same score, then sort by raw bytes comparison of store value -
 	// so we get consistently ordered results, even when score is same
 	if s[i].Score == s[j].Score {
-		return bytes.Compare(s[i].StoreValue, s[j].StoreValue) < 0
+		return bytes.Compare(s[i].Id, s[j].Id) < 0
 	}
 	return s[i].Score < s[j].Score
 }
