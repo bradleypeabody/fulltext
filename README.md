@@ -65,7 +65,7 @@ TODOs
 
 * ~~Wordize(), IndexizeWord()~~ and the scoring aggregation logic should be extracted to callback functions with the existing functionality as default.
 
-* The search logic is currently very naive.  Ideally we'd be able to have something as sophisticated as what <a href="http://lucene.apache.org/core/4_10_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html">Lucene</a> does.  But in reality what I'll likely do is a simple survey of what common features are actually used on any in-site search engines I can get my hands on.  Quoting ("black cat"), and logical operators (Jim OR James) would likely be at the top of the list and implementing that sort of thing would be higher priority than trying to duplicate Lucene.
+* The search logic is currently very naive.  Ideally we'd be able to have something as sophisticated as what <a href="http://lucene.apache.org/core/4_10_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html" target="_blank">Lucene</a> does.  But in reality what I'll likely do is a simple survey of what common features are actually used on any in-site search engines I can get my hands on.  Quoting ("black cat"), and logical operators (Jim OR James) would likely be at the top of the list and implementing that sort of thing would be higher priority than trying to duplicate Lucene.
 
 * If there is some decent b-tree disk storage that is portable then it would be worth looking at using that instead of CDB and implementing LIKE-style matching.  As it is, CDB is quite efficient, but it is a hash index.
 
