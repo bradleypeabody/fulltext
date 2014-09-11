@@ -27,6 +27,8 @@ func IndexizeWord(w string) string {
 	return strings.TrimSpace(strings.ToLower(w))
 }
 
+type StopWordChecker func(string) bool
+
 // This function copied from here: https://github.com/kennygrant/sanitize/blob/master/sanitize.go
 // License is: https://github.com/kennygrant/sanitize/blob/master/License-BSD.txt
 // Strip html tags, replace common entities, and escape <>&;'" in the result.

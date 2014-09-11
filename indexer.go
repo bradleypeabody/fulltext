@@ -16,13 +16,14 @@ const HEADER_SIZE = 4096
 
 // Produces a set of cdb files from a series of AddDoc() calls
 type Indexer struct {
-	docTxtFile  *os.File
-	wordTxtFile *os.File
-	docCdbFile  *os.File
-	wordCdbFile *os.File
-	wordMap     map[string]map[string]int // map of [word][docId]count
-	WordSplit   WordSplitter
-	WordClean   WordCleaner
+	docTxtFile    *os.File
+	wordTxtFile   *os.File
+	docCdbFile    *os.File
+	wordCdbFile   *os.File
+	wordMap       map[string]map[string]int // map of [word][docId]count
+	WordSplit     WordSplitter
+	WordClean     WordCleaner
+	StopWordCheck StopWordChecker
 }
 
 // Contents of a single document to be indexed
@@ -67,6 +68,14 @@ func (idx *Indexer) AddDoc(idoc IndexDoc) error {
 	words := append(idx.WordSplit(string(idoc.IndexValue)), idx.WordSplit(string(idoc.StoreValue))...)
 	for _, word := range words {
 		word = idx.WordClean(word)
+
+		// skip if stop word
+		if idx.StopWordCheck != nil {
+			if idx.StopWordCheck(word) {
+				continue
+			}
+		}
+
 		// ensure nested map exists
 		if idx.wordMap[word] == nil {
 			idx.wordMap[word] = make(map[string]int)

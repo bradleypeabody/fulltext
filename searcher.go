@@ -3,7 +3,6 @@ package fulltext
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"github.com/jbarham/go-cdb"
 	"io"
 	"io/ioutil"
@@ -84,8 +83,6 @@ func (s *Searcher) Close() error {
 	s.docCdb = nil
 	s.wordCdb = nil
 	return s.file.Close()
-	fmt.Printf("")
-	return nil
 }
 
 // Perform a search

@@ -67,6 +67,9 @@ func TestTheBardSearch(t *testing.T) {
 	}
 	defer idx.Close()
 
+	// use English stop words
+	idx.StopWordCheck = EnglishStopWordChecker
+
 	titlere := re.MustCompile("(?i)<title>([^<]+)</title>")
 
 	zr, err := zip.OpenReader("testdata/shakespeare.mit.edu.zip")
@@ -145,6 +148,10 @@ func TestTheBardSearch(t *testing.T) {
 		panic(err)
 	}
 
+	if len(sr.Items) == 0 {
+		t.Fatalf("Search for 'king' returned 0 results, but should have gotten something")
+	}
+
 	fmt.Printf("Searching took: %s\n", time.Since(start).String())
 
 	fmt.Printf("Total Results for 'king': %d\n", len(sr.Items))
@@ -156,6 +163,17 @@ func TestTheBardSearch(t *testing.T) {
 	}
 
 	fmt.Printf("Raw dump: %+v\n", sr)
+
+	// look for a stop word and make sure it's not there
+
+	sr, err = s.SimpleSearch("the", 20)
+	if err != nil {
+		panic(err)
+	}
+	if len(sr.Items) != 0 {
+		t.Fatalf("Search for 'the' returned %d results when it should have been 0 because it's a stop word", len(sr.Items))
+	}
+	fmt.Printf("Check for stop word passed\n")
 
 	///////////////////////////////////////////////////
 

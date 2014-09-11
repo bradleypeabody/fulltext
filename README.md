@@ -30,6 +30,9 @@ First, you must create an index.  Like this:
 	idx, err := fulltext.NewIndexer(""); if err != nil { panic(err) }
 	defer idx.Close()
 
+	// provide stop words if desired
+	idx.StopWordCheck = fulltext.EnglishStopWordChecker
+
 	// for each document you want to add, you do something like this:
 	doc := fulltext.IndexDoc{
 		Id: []byte(uuid), // unique identifier (the path to a webpage works...)
@@ -58,7 +61,7 @@ It's rather simplistic.  But it's fast and it works.
 TODOs
 -----
 
-* Will likely need some sort of "stop word" functionality.
+* ~~Will likely need some sort of "stop word" functionality.~~
 
 * ~~Wordize(), IndexizeWord()~~ and the scoring aggregation logic should be extracted to callback functions with the existing functionality as default.
 
