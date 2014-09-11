@@ -1,6 +1,7 @@
 package fulltext
 
 import (
+	"bytes"
 	"encoding/gob"
 	"fmt"
 	"github.com/jbarham/go-cdb"
@@ -39,9 +40,16 @@ type SearchResultItem struct {
 // Implement sort.Interface
 type SearchResultItems []SearchResultItem
 
-func (s SearchResultItems) Len() int           { return len(s) }
-func (s SearchResultItems) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s SearchResultItems) Less(i, j int) bool { return s[i].Score < s[j].Score }
+func (s SearchResultItems) Len() int      { return len(s) }
+func (s SearchResultItems) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s SearchResultItems) Less(i, j int) bool {
+	// if same score, then sort by raw bytes comparison of store value -
+	// so we get consistently ordered results, even when score is same
+	if s[i].Score == s[j].Score {
+		return bytes.Compare(s[i].StoreValue, s[j].StoreValue) < 0
+	}
+	return s[i].Score < s[j].Score
+}
 
 // What happened during the search
 type SearchResults struct {
