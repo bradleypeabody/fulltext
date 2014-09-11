@@ -13,14 +13,14 @@ func init() {
 	wordizeRe = re.MustCompile("[\\s,.;:!?[\\]()'\"]+")
 }
 
-type WordSplitter func(string)[]string;
+type WordSplitter func(string) []string
 
 // Split a string up into words
 func Wordize(t string) []string {
 	return wordizeRe.Split(t, -1)
 }
 
-type WordCleaner func(string)string;
+type WordCleaner func(string) string
 
 // Make word appropriate for indexing
 func IndexizeWord(w string) string {

@@ -1,41 +1,51 @@
-
 package fulltext
 
 import (
-	"os"
 	"fmt"
 	"io/ioutil"
-	"testing"
+	"os"
 	"path/filepath"
 	re "regexp"
+	"testing"
 )
 
 func TestIndexer(t *testing.T) {
 	fmt.Printf("TestIndexer\n")
 
-	idx, err := NewIndexer(""); if err != nil { panic(err) }
+	idx, err := NewIndexer("")
+	if err != nil {
+		panic(err)
+	}
 
-	idx.AddDoc(IndexDoc{Id:[]byte(`blah1`),StoreValue:[]byte(`store this`),IndexValue:[]byte(`test of the emergency broadcast system`)})
-	idx.AddDoc(IndexDoc{Id:[]byte(`blah2`),StoreValue:[]byte(`store this stuff too, yeah store it`),IndexValue:[]byte(`every good boy does fine`)})
-	idx.AddDoc(IndexDoc{Id:[]byte(`blah3`),StoreValue:[]byte(`more storage here`),IndexValue:[]byte(`a taco in the hand is worth two in the truck`)})
+	idx.AddDoc(IndexDoc{Id: []byte(`blah1`), StoreValue: []byte(`store this`), IndexValue: []byte(`test of the emergency broadcast system`)})
+	idx.AddDoc(IndexDoc{Id: []byte(`blah2`), StoreValue: []byte(`store this stuff too, yeah store it`), IndexValue: []byte(`every good boy does fine`)})
+	idx.AddDoc(IndexDoc{Id: []byte(`blah3`), StoreValue: []byte(`more storage here`), IndexValue: []byte(`a taco in the hand is worth two in the truck`)})
 
 	idx.DumpStatus(os.Stdout)
 
-	f, err := ioutil.TempFile("", "idxout"); if err != nil { panic(err) }
-	err = idx.FinalizeAndWrite(f); if err != nil { panic(err) }
+	f, err := ioutil.TempFile("", "idxout")
+	if err != nil {
+		panic(err)
+	}
+	err = idx.FinalizeAndWrite(f)
+	if err != nil {
+		panic(err)
+	}
 	f.Close()
 
 	fmt.Printf("Wrote index file: %s\n", f.Name())
 
 }
 
-
 // A more extensive test - index the complete works of William Shakespeare
 func NoTestTheBardIndexing(t *testing.T) {
-	
+
 	fmt.Println("TestTheBardIndexing")
 
-	idx, err := NewIndexer(""); if err != nil { panic(err) }
+	idx, err := NewIndexer("")
+	if err != nil {
+		panic(err)
+	}
 	defer idx.Close()
 
 	titlere := re.MustCompile("(?i)<title>([^<]+)</title>")
@@ -46,11 +56,14 @@ func NoTestTheBardIndexing(t *testing.T) {
 		if !f.IsDir() /*&& n < 5*/ {
 			n++
 			fmt.Printf("indexing: %s\n", path)
-			b, err := ioutil.ReadFile(path); if err != nil { panic(err) }
+			b, err := ioutil.ReadFile(path)
+			if err != nil {
+				panic(err)
+			}
 			title := string(titlere.Find(b))
 			body := HTMLStripTags(string(b))
 			doc := IndexDoc{
-				Id: []byte(path),
+				Id:         []byte(path),
 				StoreValue: []byte(title),
 				IndexValue: []byte(title + " " + title + " " + body),
 			}
@@ -62,12 +75,16 @@ func NoTestTheBardIndexing(t *testing.T) {
 	// idx.DebugDump(os.Stdout)
 
 	fmt.Println("Writing final index...")
-	f, err := ioutil.TempFile("", "idxout"); if err != nil { panic(err) }
-	err = idx.FinalizeAndWrite(f); if err != nil { panic(err) }
+	f, err := ioutil.TempFile("", "idxout")
+	if err != nil {
+		panic(err)
+	}
+	err = idx.FinalizeAndWrite(f)
+	if err != nil {
+		panic(err)
+	}
 	f.Close()
 
 	fmt.Printf("Wrote index file: %s\n", f.Name())
 
 }
-
-
