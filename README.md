@@ -10,7 +10,7 @@ Cdb (http://github.com/jbarham/go-cdb) is used to perform the indexing and looku
 Status
 ------
 
-This project is experimental.  Breaking changes very well may occur.
+This project is more or less stable.
 
 Notes on Building
 --------
@@ -57,6 +57,13 @@ Once you have an index file, you can search it like this:
 	}
 
 It's rather simplistic.  But it's fast and it works.
+
+Thoughts in Comparison to blevesearch
+-------------------------------------
+
+I wrote this project before <a href="https://github.com/blevesearch/bleve">blevesearch</a> was released.  I've done a number of implementions now of website search engines using fulltext and also a number of others using blevesearch.  My general experience has been that blevesearch is better suited for projects where you are really doing significant development on your search results and need the ability to customize things for various locales, etc.  Fulltext on the other hand is much simpler and is better for projects that either a) have simpler search requirements or b) prefer speed of indexing over quality of results.
+
+Adding a fulltext search engine to a website with a few hundred pages is a simple task and the indexing is fast enough that you can just run it as part of your pre-publish build process.  So while there is a lot more development on blevesearch happening - and hats off to them, it's a great product - fulltext still seems to have it's place for these simpler scenarios.
 
 TODOs
 -----
