@@ -74,8 +74,7 @@ TODOs
 
 * The search logic is currently very naive.  Ideally this project would have something as sophisticated as <a href="http://lucene.apache.org/core/4_10_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html" target="_blank">Lucene's query parser</a>.  But in reality what I'll likely do is a simple survey of which common features are actually used on any on-site search engines I can get my hands on.  Quoting ("black cat"), and logical operators (Jim OR James) would likely be at the top of the list and implementing that sort of thing would be higher priority than trying to duplicate Lucene.
 
-* If there is some decent b-tree disk storage that is portable then it would be worth looking at using that instead of CDB and implementing LIKE-style matching.  As it is, CDB is quite efficient, but it is a hash index.
-
+* I've considered using boltdb for storage as an alternative to CDB, but I haven't found the time to work on it.  This approach would provide the ability to update the index, reduce memory consumption during index building, and potenteially allow for wildcard suffixes.
 
 Implementation Notes
 --------------------
