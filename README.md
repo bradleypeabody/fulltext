@@ -5,7 +5,7 @@ This is a simple, pure-Go, full text indexing and search library.
 
 I made it for use on small to medium websites, although there is nothing web-specific about it's API or operation.
 
-Cdb (http://github.com/jbarham/go-cdb) is used to perform the indexing and lookups.
+Cdb (http://github.com/jbarham/go-cdb) is used to perform the indexing and lookups and  [github.com/spf13/afero](https://github.com/spf13/afero) is used as a in-memory filesystem for search indizes.
 
 Status
 ------
@@ -15,43 +15,73 @@ This project is experimental.  Breaking changes very well may occur.
 Notes on Building
 --------
 
-fulltext requires CDB:
+fulltext requires jbarham/go-cdb and spf13/afero:
 
-	go get github.com/jbarham/go-cdb
+```bash
+go get github.com/jbarham/go-cdb
+go get github.com/spf13/afero
+```
 
 Usage
 ------
 
-First, you must create an index.  Like this:
+First, you must create an index. Like this:
 
-	import "github.com/bradleypeabody/fulltext"
+```go
+import "github.com/bradleypeabody/fulltext"
 
-	// create new index with temp dir (usually "" is fine)
-	idx, err := fulltext.NewIndexer(""); if err != nil { panic(err) }
-	defer idx.Close()
+// create new index with temp dir (usually "" is fine)
+idx, err := fulltext.NewIndexer()
+if err != nil {
+	panic(err)
+}
+defer idx.Close()
 
-	// for each document you want to add, you do something like this:
-	doc := fulltext.IndexDoc{
-		Id: []byte(uuid), // unique identifier (the path to a webpage works...)
-		StoreValue: []byte(title), // bytes you want to be able to retrieve from search results
-		IndexValue: []byte(data), // bytes you want to be split into words and indexed
-	}
-	idx.AddDoc(doc) // add it
+// for each document you want to add, you do something like this:
+doc := fulltext.IndexDoc{
+	Id: []byte(uuid), // unique identifier (the path to a webpage works...)
+	StoreValue: []byte(title), // bytes you want to be able to retrieve from search results
+	IndexValue: []byte(data), // bytes you want to be split into words and indexed
+}
 
-	// when done, write out to final index
-	err = idx.FinalizeAndWrite(f); if err != nil { panic(err) }
+idx.AddDoc(doc) // add it
+
+// when done, write out to final index
+if err := idx.FinalizeAndWrite(f); err != nil {
+	panic(err)
+}
+```
 
 Once you have an index file, you can search it like this:
 
-	s, err := fulltext.NewSearcher("/path/to/index/file"); if err != nil { panic(err) }
-	defer s.Close()
-	sr, err := s.SimpleSearch("Horatio", 20); if err != nil { panic(err) }
-	for k, v := range sr.Items {
-		fmt.Printf("----------- #:%d\n", k)
-		fmt.Printf("Id: %s\n", v.Id)
-		fmt.Printf("Score: %d\n", v.Score)
-		fmt.Printf("StoreValue: %s\n", v.StoreValue)
-	}
+```go
+
+// create and in-memory index file
+var indexFs afero.Fs = &afero.MemMapFs{}
+indexFile, err := indexFs.Create("idxout")
+if err != nil {
+	panic(err)
+}
+
+s, err := fulltext.NewSearcher(indexFile)
+if err != nil {
+	panic(err)
+}
+
+defer s.Close()
+
+sr, err := s.SimpleSearch("Horatio", 20)
+if err != nil {
+	panic(err)
+}
+
+for k, v := range sr.Items {
+	fmt.Printf("----------- #:%d\n", k)
+	fmt.Printf("Id: %s\n", v.Id)
+	fmt.Printf("Score: %d\n", v.Score)
+	fmt.Printf("StoreValue: %s\n", v.StoreValue)
+}
+```
 
 It's rather simplistic.  But it's fast and it works.
 

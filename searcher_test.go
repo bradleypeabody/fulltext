@@ -1,115 +1,145 @@
-
 package fulltext
 
 import (
-	"os"
+	"archive/zip"
+	"bytes"
 	"fmt"
-	"net"
-	"net/http"
+	"github.com/spf13/afero"
+	"html/template"
 	"io"
 	"io/ioutil"
-	"testing"
-	"strings"
-	"archive/zip"
+	"net"
+	"net/http"
+	"os"
 	"path/filepath"
-	"strconv"
 	re "regexp"
-	"bytes"
+	"strconv"
+	"strings"
+	"testing"
 	"time"
-	"html/template"
 )
 
 // Extract a single file from a zip and return it's contents
 func zipExtract(zfpath string, fpath string) ([]byte, error) {
 
-	zr, err := zip.OpenReader(zfpath); if err != nil { return nil, err }
+	zr, err := zip.OpenReader(zfpath)
+	if err != nil {
+		return nil, err
+	}
 	defer zr.Close()
 
 	fpath = strings.Trim(filepath.Clean(filepath.ToSlash(fpath)), "/")
 
-    for _, f := range zr.File {
+	for _, f := range zr.File {
 
-    	fn := strings.Trim(filepath.Clean(filepath.ToSlash(f.Name)), "/")
+		fn := strings.Trim(filepath.Clean(filepath.ToSlash(f.Name)), "/")
 
-    	// keep going until we find it
-    	if fn != fpath { continue }
+		// keep going until we find it
+		if fn != fpath {
+			continue
+		}
 
-		rc, err := f.Open(); if err != nil { panic(err) }
-		b, err := ioutil.ReadAll(rc); if err != nil { return nil, err }
+		rc, err := f.Open()
+		if err != nil {
+			panic(err)
+		}
+		b, err := ioutil.ReadAll(rc)
+		if err != nil {
+			return nil, err
+		}
 		rc.Close()
 
 		return b, nil
 
-    }
+	}
 
-    return nil, io.EOF
+	return nil, io.EOF
 
 }
 
-
 // Index and search the complete works of William Shakespeare
 func TestTheBardSearch(t *testing.T) {
-	
+
 	fmt.Println("TestTheBardIndexing")
 
-	idx, err := NewIndexer(""); if err != nil { panic(err) }
+	idx, err := NewIndexer()
+	if err != nil {
+		panic(err)
+	}
 	defer idx.Close()
 
 	titlere := re.MustCompile("(?i)<title>([^<]+)</title>")
-
-	zr, err := zip.OpenReader("testdata/shakespeare.mit.edu.zip"); if err != nil { panic(err) }
+	zr, err := zip.OpenReader("testdata/shakespeare.mit.edu.zip")
+	if err != nil {
+		panic(err)
+	}
 	defer zr.Close()
 
-    for _, f := range zr.File {
+	for _, f := range zr.File {
 		fmt.Printf("indexing: %s\n", f.Name)
 
-		rc, err := f.Open(); if err != nil { panic(err) }
-		b, err := ioutil.ReadAll(rc); if err != nil { panic(err) }
+		rc, err := f.Open()
+		if err != nil {
+			panic(err)
+		}
+		b, err := ioutil.ReadAll(rc)
+		if err != nil {
+			panic(err)
+		}
 
 		// extract title tag
 		tret := titlere.FindSubmatch(b)
 		title := ""
-		if len(tret) > 1 { title = strings.TrimSpace(string(tret[1])) }
+		if len(tret) > 1 {
+			title = strings.TrimSpace(string(tret[1]))
+		}
 
 		// strip html from entire doc and get text
 		body := HTMLStripTags(string(b))
 
 		// make a doc out of it
 		doc := IndexDoc{
-			Id: []byte(f.Name),
+			Id:         []byte(f.Name),
 			StoreValue: []byte(title),
 			IndexValue: []byte(title + " " + title + " " + body),
 		}
 		idx.AddDoc(doc)
 
-
 		rc.Close()
-    }
+	}
 
 	fmt.Println("Writing final index...")
-	f, err := ioutil.TempFile("", "idxout"); if err != nil { panic(err) }
-	err = idx.FinalizeAndWrite(f); if err != nil { panic(err) }
+	var indexFs afero.Fs = &afero.MemMapFs{}
+	searchIndexFile, err := indexFs.Create("idxout")
+	if err != nil {
+		panic(err)
+	}
+	err = idx.FinalizeAndWrite(searchIndexFile)
+	if err != nil {
+		panic(err)
+	}
 
-	fmt.Println("Debug data: \n")
-	idx.DumpStatus(os.Stdout)
+	defer searchIndexFile.Close()
 
-	// panic("DONE")
-
-	f.Close()
-
-	fmt.Printf("Wrote index file: %s\n", f.Name())
+	fmt.Printf("Wrote index file: %s\n", searchIndexFile.Name())
 
 	/////////////////////////////////
 
 	start := time.Now()
 
-	s, err := NewSearcher(f.Name()); if err != nil { panic(err) }
+	searcher, err := NewSearcher(searchIndexFile)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("Opening searcher took: %s\n", time.Since(start).String())
 
 	start = time.Now()
 
-	sr, err := s.SimpleSearch("king", 20); if err != nil { panic(err) }
+	sr, err := searcher.SimpleSearch("king", 20)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("Searching took: %s\n", time.Since(start).String())
 
@@ -123,19 +153,21 @@ func TestTheBardSearch(t *testing.T) {
 
 	fmt.Printf("Raw dump: %+v\n", sr)
 
-
 	///////////////////////////////////////////////////
 
 	fmt.Printf("Starting Shakespeare's very own search interface at :1414 ...")
 
-
 	ln, err := net.Listen("tcp", ":1414")
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 
 	timeoutStr := os.Getenv("SEARCHER_WEB_TIMEOUT_SECONDS")
 
 	timeout, err := strconv.Atoi(timeoutStr)
-	if err != nil { timeout = 10 }
+	if err != nil {
+		timeout = 10
+	}
 
 	zfpath := "testdata/shakespeare.mit.edu.zip"
 
@@ -146,7 +178,10 @@ func TestTheBardSearch(t *testing.T) {
 	err = http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		// home page redirect
-		if r.URL.Path == "/" || r.URL.Path == "/Shakespeare" { http.Redirect(w, r, "/shakespeare.mit.edu/index.html", 302); return }
+		if r.URL.Path == "/" || r.URL.Path == "/Shakespeare" {
+			http.Redirect(w, r, "/shakespeare.mit.edu/index.html", 302)
+			return
+		}
 
 		// handle search result page
 		if r.URL.Path == "/searchresults.html" {
@@ -156,15 +191,20 @@ func TestTheBardSearch(t *testing.T) {
 			q := r.FormValue("q")
 
 			// do search
-			sr, err := s.SimpleSearch(q, 20); if err != nil { panic(err) }
+			sr, err := searcher.SimpleSearch(q, 20)
+			if err != nil {
+				panic(err)
+			}
 
 			// render results page
 			sres, err := ioutil.ReadFile("testdata/searchresults.html")
-			if err != nil { panic(err) }
+			if err != nil {
+				panic(err)
+			}
 			t := template.Must(template.New("main").Parse(string(sres)))
 			var buf bytes.Buffer
 			t.Execute(&buf, &map[string]interface{}{
-				"q": q,
+				"q":  q,
 				"sr": sr,
 			})
 			sresbytes := buf.Bytes()
@@ -176,10 +216,18 @@ func TestTheBardSearch(t *testing.T) {
 
 		// by default look through zip file
 		b, err := zipExtract(zfpath, r.URL.Path)
-		if err != nil { http.Error(w, "File not found", 404) }
-		if strings.HasSuffix(r.URL.Path, ".css") { w.Header().Set("Content-type", "text/css") }
-		if strings.HasSuffix(r.URL.Path, ".gif") { w.Header().Set("Content-type", "image/gif") }
-		if strings.HasSuffix(r.URL.Path, ".jpg") { w.Header().Set("Content-type", "image/jpeg") }
+		if err != nil {
+			http.Error(w, "File not found", 404)
+		}
+		if strings.HasSuffix(r.URL.Path, ".css") {
+			w.Header().Set("Content-type", "text/css")
+		}
+		if strings.HasSuffix(r.URL.Path, ".gif") {
+			w.Header().Set("Content-type", "image/gif")
+		}
+		if strings.HasSuffix(r.URL.Path, ".jpg") {
+			w.Header().Set("Content-type", "image/jpeg")
+		}
 
 		// for html files we inject a search box
 		if strings.HasSuffix(r.URL.Path, ".html") {
@@ -187,15 +235,17 @@ func TestTheBardSearch(t *testing.T) {
 
 			// render search form
 			sf, err := ioutil.ReadFile("testdata/searchform.html")
-			if err != nil { panic(err) }
+			if err != nil {
+				panic(err)
+			}
 			t := template.Must(template.New("main").Parse(string(sf)))
 			var buf bytes.Buffer
 			t.Execute(&buf, r.FormValue("q"))
 			sfbytes := buf.Bytes()
 
 			// inject into page
-			
-			pagebytes := re.MustCompile("(<body[^>]*>)").ReplaceAllLiteral(b, []byte("<body bgcolor=\"#ffffff\" text=\"#000000\">" + string(sfbytes)))
+
+			pagebytes := re.MustCompile("(<body[^>]*>)").ReplaceAllLiteral(b, []byte("<body bgcolor=\"#ffffff\" text=\"#000000\">"+string(sfbytes)))
 			w.Write(pagebytes)
 			return
 
@@ -205,11 +255,10 @@ func TestTheBardSearch(t *testing.T) {
 
 	}))
 
-	if err != nil { fmt.Printf("err from listen: %s\n", err) }
+	if err != nil {
+		fmt.Printf("err from listen: %s\n", err)
+	}
 
-	s.Close()
+	searcher.Close()
 
 }
-
-
-
